@@ -1,6 +1,6 @@
 # shared_prefs_1
 
-A new Flutter project.
+Shared Preferences Project #1
 
 ## Getting Started
 
