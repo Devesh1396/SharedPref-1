@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
-
+import 'package:shared_prefs_1/LoginUI.dart';
 
 class HomeUI extends StatefulWidget {
   @override
@@ -12,12 +9,8 @@ class HomeUI extends StatefulWidget {
 
 class _HomeUIState extends State<HomeUI> {
 
-  TextEditingController _nameController = TextEditingController();
-  String? _lastSavedName;
+  String? _username;
   SharedPreferences? prefs;
-  List<String> logList = [];
-  int appOpenCount = 0;
-  Color? backgroundColor;
 
   @override
   void initState() {
@@ -28,134 +21,50 @@ class _HomeUIState extends State<HomeUI> {
   void _loadData() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
-      _lastSavedName = prefs!.getString('name');
-      appOpenCount = prefs?.getInt('appOpenCount') ?? 0;
-      logList = prefs?.getStringList('logList') ?? [];
-
-      int? colorValue = prefs?.getInt('backgroundColor');
-      if (colorValue != null) {
-        backgroundColor = Color(colorValue);
-      } else {
-        backgroundColor = Colors.white; // Default color
-      }
-
+      _username = prefs!.getString('username');
     });
-    _logAppOpenTime();
   }
 
-  void _logAppOpenTime() async {
+  void _logout(BuildContext context) async {
     prefs = await SharedPreferences.getInstance();
+    await prefs!.setBool('userSession', false);
 
-    appOpenCount += 1;
-    await prefs?.setInt('appOpenCount', appOpenCount);
-
-    if (appOpenCount % 3 == 0) {
-      _generateRandomColor();
-    }
-
-    String currentTime = DateFormat('dd-MM-yyyy HH:mm:ss').format(DateTime.now());
-
-    logList.add('Open: $currentTime');
-    await prefs?.setStringList('logList', logList);
-
-    setState(() {
-    });
-  }
-
-  void _generateRandomColor() {
-    final random = Random();
-    final color = Color.fromARGB(
-      255,
-      random.nextInt(256),
-      random.nextInt(256),
-      random.nextInt(256),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginUI()),
     );
-
-    backgroundColor = color;
-    prefs?.setInt('backgroundColor', color.value);
   }
 
-
-  /*
-  void _logAppCloseTime() async {
-    prefs = await SharedPreferences.getInstance();
-
-    String currentTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-
-    logList[logList.length - 1] += ' | Close: $currentTime';
-    await prefs?.setStringList('logList', logList);
-
-    setState(() {
-    });
-  }
-  */
-
-  void _setName() async {
-    String name = _nameController.text;
-    if (name.isNotEmpty) {
-      prefs = await SharedPreferences.getInstance();
-      await prefs!.setString('name', name);
-
-      setState(() {
-        _lastSavedName = name;
-        _nameController.clear();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    //_logAppCloseTime();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor ?? Colors.white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        title: Text(
+            "Home",
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout_outlined),
+            color: Colors.black,
+            onPressed: (){
+              _logout(context);
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Enter your name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _setName,
-              child: Text('Save Name'),
-            ),
-            SizedBox(height: 20),
-            if (_lastSavedName != null)
               Text(
-                'Your last input name was: $_lastSavedName',
+                'Hello, ${_username ?? 'Guest'}',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             SizedBox(height: 20),
-            Text(
-              'No. of times App Open: $appOpenCount',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: logList.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Text('${index + 1}'),
-                    title: Text(logList[index]),
-                  );
-                },
-              ),
-            ),
           ],
         ),
       ),

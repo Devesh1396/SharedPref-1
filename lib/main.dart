@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_prefs_1/HomeUI.dart';
+import 'SplashUI.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,7 +8,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,7 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: HomeUI(),
+      debugShowCheckedModeBanner: false,
+      home: SplashUI(),
     );
   }
 }
